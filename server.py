@@ -12,15 +12,23 @@ server.bind(ADDRESS)
 
 
 def handle_client(conn, addr):
-    print("New connection: " + addr + "connected.")
+    print("New connection: " + str(addr) + " connected.")
     connected = True
     while connected:
         msg_length = conn.recv(HEADER).decode("utf-8")
-        msg_length = int(msg_length)
-        msg = conn.recv(msg_length).decode("utf-8")
-        if msg == DISCONNECT_MESSAGE:
-            connected = False
-        print(f"[{addr}] {msg}")
+        if msg_length:
+            msg_length = int(msg_length)
+            msg = conn.recv(msg_length).decode("utf-8")
+            if msg == DISCONNECT_MESSAGE:
+                connected = False
+            print(f"[{addr}] {msg}")
+
+            message = msg.upper().encode("utf-8")
+            msg_length = len(message)
+            send_length = str(msg_length).encode("utf-8")
+            send_length += b" " * (HEADER -len(send_length))
+            conn.send(send_length)
+            conn.send(message)
 
     conn.close()
 
@@ -32,7 +40,7 @@ def start():
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
-        print("Active connections: " + str(threading.activeCount() - 1))
+        print("Active connections: " + str(threading.active_count() - 1))
 
 
 print("Starting server...")
