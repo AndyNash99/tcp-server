@@ -13,16 +13,15 @@ server.bind(ADDRESS)
 
 def handle_client(conn, addr):
     print("New connection: " + str(addr) + " connected.")
-    connected = True
-    while connected:
+    while True:
         msg_length = conn.recv(HEADER).decode("utf-8")
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode("utf-8")
             if msg == DISCONNECT_MESSAGE:
-                connected = False
-            print(f"[{addr}] {msg}")
+                break
 
+            print(f"[{addr}] {msg}")
             message = msg.upper().encode("utf-8")
             msg_length = len(message)
             send_length = str(msg_length).encode("utf-8")
